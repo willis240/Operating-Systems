@@ -88,12 +88,13 @@ int main()
 		wordCount[word] = 0;
 	}
 
-	int numThreads = 8;
+	int numThreads = 1; //Adjust this number to change how many threads are being used
 	vector<thread> threads;
-	int begin = 0;
-	int end = (allWords.size() / numThreads);
 
-	//auto beginClock = std::chrono::steady_clock::now(); //start the timer
+	int begin = 0; //beginning of range for thread
+	int end = (allWords.size() / numThreads); //end of range for thread
+
+	auto start = std::chrono::high_resolution_clock::now(); //start the timer
 	for (int i = 0; i < numThreads; ++i)
 	{
 		thread t(countOccurrences, std::ref(allWords), std::ref(searchWords), std::ref(wordCount), numThreads, begin, end);
@@ -101,13 +102,14 @@ int main()
 		begin = end;
 		end += (allWords.size() / numThreads);
 	}
-	//auto endClock = std::chrono::steady_clock::now(); //end the timer
-	//auto elapsedTime = endClock - beginClock;
 
 	for (int i = 0; i < threads.size(); ++i)
 	{
 		threads[i].join();
 	}
+
+	auto stop = std::chrono::high_resolution_clock::now(); //end the timer
+	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
 
 	for (auto word : searchWords)
 	{
@@ -115,6 +117,6 @@ int main()
 	}
 
 	cout << "This program was run using " << numThreads << " threads." << endl;
-	//cout << "It took " << std::chrono::duration<double>(elapsedTime).count() << " for the threads to do their thing." << endl;
+	cout << "It took " << duration.count() << " microseconds for the threads to do their thing." << endl;
 }
 
